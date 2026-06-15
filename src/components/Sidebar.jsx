@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom'
 import { useLeads } from '../context/LeadsContext'
+import { useAuth } from '../context/AuthContext'
 import {
-  IconDashboard, IconLeads, IconPipeline, IconSettings, IconSpark,
+  IconDashboard, IconLeads, IconPipeline, IconSettings, IconLogout,
 } from './Icons'
 
 const nav = [
@@ -11,9 +12,10 @@ const nav = [
 ]
 
 export default function Sidebar() {
-  const { stats, settings } = useLeads()
-  const counselor = settings.counselor || 'Counselor'
-  const init = counselor.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+  const { stats } = useLeads()
+  const { user, logout } = useAuth()
+  const display = user?.name || user?.email || 'Account'
+  const init = display.split(/[\s@.]+/).map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
 
   return (
     <aside className="sidebar">
@@ -41,11 +43,14 @@ export default function Sidebar() {
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="avatar">{init || 'CN'}</div>
-          <div>
-            <div className="nm">{counselor}</div>
-            <div className="rl">{settings.org || 'Counselor'}</div>
+          <div className="avatar">{init || 'A'}</div>
+          <div style={{ minWidth: 0 }}>
+            <div className="nm">{display}</div>
+            <div className="rl">{user?.role || 'admin'}</div>
           </div>
+          <button className="sidebar-logout" onClick={logout} title="Sign out" aria-label="Sign out">
+            <IconLogout size={17} />
+          </button>
         </div>
       </div>
     </aside>

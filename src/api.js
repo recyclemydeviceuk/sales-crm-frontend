@@ -2,16 +2,39 @@
 // The base URL comes from VITE_API_URL (.env). In dev it defaults to "/api",
 // which Vite proxies to the Node server (see vite.config.js).
 const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
+const TOKEN_KEY = 'sales-crm-token'
+
+let authToken = localStorage.getItem(TOKEN_KEY) || null
+let onUnauthorized = null
+
+export function setAuthToken(token) {
+  authToken = token || null
+  if (token) localStorage.setItem(TOKEN_KEY, token)
+  else localStorage.removeItem(TOKEN_KEY)
+}
+export function getAuthToken() {
+  return authToken
+}
+// Called when a protected request returns 401 (expired/invalid session).
+export function setUnauthorizedHandler(fn) {
+  onUnauthorized = fn
+}
 
 async function request(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }
+  if (authToken) headers.Authorization = `Bearer ${authToken}`
+
   let res
   try {
-    res = await fetch(BASE + path, {
-      headers: { 'Content-Type': 'application/json' },
-      ...options,
-    })
+    res = await fetch(BASE + path, { ...options, headers })
   } catch {
-    throw new Error('Cannot reach the server. Is the backend running on port 4000?')
+    throw new Error('Cannot reach the server. Is the backend running?')
+  }
+
+  // Session expired on a protected route → trigger logout (but not for login/register).
+  if (res.status === 401 && !path.startsWith('/auth')) {
+    setAuthToken(null)
+    onUnauthorized?.()
   }
   if (!res.ok) {
     let message = `Request failed (${res.status})`
@@ -23,6 +46,11 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  // Auth
+  login: (email, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  register: (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+  me: () => request('/auth/me'),
+
   // Load everything the app needs in one shot.
   bootstrap: async () => {
     const [leadsRes, lists, settings] = await Promise.all([

@@ -79,6 +79,9 @@ export const IconChevronLeft = (p) => (
 export const IconChevronDown = (p) => (
   <Icon {...p} path={<path d="m6 9 6 6 6-6" />} />
 )
+export const IconLogout = (p) => (
+  <Icon {...p} path={<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></>} />
+)
 export const IconChevronRight = (p) => (
   <Icon {...p} path={<path d="m9 18 6-6-6-6" />} />
 )

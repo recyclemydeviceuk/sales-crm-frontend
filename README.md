@@ -29,6 +29,17 @@ npm run seed                # loads all 4,248 leads + lists into the database
 npm run dev                 # API on http://localhost:4000
 ```
 
+**Authentication** — the CRM is gated by email/password login (JWT).
+
+- Set `JWT_SECRET` and `ADMIN_SETUP_KEY` in `server/.env` (generate with `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`).
+- Create the first admin with the seeder:
+  ```bash
+  npm run seed:admin -- --email you@company.com --password "yourpassword" --name "Your Name"
+  ```
+  (or set `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env` and run `npm run seed:admin`).
+- Additional users can self-register at `/register` by entering the `ADMIN_SETUP_KEY`.
+- All `/api/leads`, `/api/lists`, `/api/settings`, `/api/stats` routes require a valid token; `/api/auth/*` and `/api/health` are public.
+
 **MongoDB connection** — set `MONGODB_URI` in `server/.env`:
 
 - **Atlas:** `mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/sales-crm`
