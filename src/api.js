@@ -1,7 +1,11 @@
 // Thin REST client for the Sales CRM backend.
-// The base URL comes from VITE_API_URL (.env). In dev it defaults to "/api",
-// which Vite proxies to the Node server (see vite.config.js).
-const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
+// Base URL resolution:
+//   1. VITE_API_URL if set (Vercel env var or .env)
+//   2. In production builds, fall back to the deployed backend
+//   3. In dev, "/api" (proxied to the local Node server by Vite)
+const PROD_API = 'https://sales-crm-backend-hwu6.onrender.com/api'
+const RAW_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PROD_API : '/api')
+const BASE = RAW_BASE.replace(/\/$/, '')
 const TOKEN_KEY = 'sales-crm-token'
 
 let authToken = localStorage.getItem(TOKEN_KEY) || null
