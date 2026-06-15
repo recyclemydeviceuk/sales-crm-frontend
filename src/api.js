@@ -4,7 +4,11 @@
 //   2. In production builds, fall back to the deployed backend
 //   3. In dev, "/api" (proxied to the local Node server by Vite)
 const PROD_API = 'https://sales-crm-backend-hwu6.onrender.com/api'
-const RAW_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PROD_API : '/api')
+const envUrl = import.meta.env.VITE_API_URL
+// Only trust an absolute http(s) URL from env. A stray "/api" (e.g. a leftover
+// host env var) is ignored so production never posts back to the frontend origin.
+const isAbsolute = typeof envUrl === 'string' && /^https?:\/\//i.test(envUrl)
+const RAW_BASE = isAbsolute ? envUrl : (import.meta.env.PROD ? PROD_API : '/api')
 const BASE = RAW_BASE.replace(/\/$/, '')
 const TOKEN_KEY = 'sales-crm-token'
 
